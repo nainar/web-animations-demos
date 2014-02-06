@@ -14,11 +14,11 @@
     "github-js": "michael/github#master"
   },
   "homepage": "https://github.com/web-animations/web-animations-tools",
-  "_release": "46f5737e86",
+  "_release": "383541fb10",
   "_resolution": {
     "type": "branch",
     "branch": "master",
-    "commit": "46f5737e86c82046d7669deecd0c49003882161d"
+    "commit": "383541fb10b19b0dbbc51f6324fe0f4c7d13552d"
   },
   "_source": "git://github.com/web-animations/web-animations-tools.git",
   "_target": "master",

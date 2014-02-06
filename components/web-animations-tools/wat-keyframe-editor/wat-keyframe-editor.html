@@ -1,0 +1,239 @@
+<!--
+Copyright 2014 Google Inc. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+
+limitations under the License.
+-->
+
+<!DOCTYPE html>
+
+<link rel="import" href="wat-keyframe-item.html">
+
+<polymer-element name="wat-keyframe-editor" attributes="timedItem width">
+  <template>
+  <style>
+    .property-container {
+      position: relative;
+      height: 40px;
+    }
+    #keyframe-container {
+      min-width: {{width}}px;
+    }
+    #new-property-prompt {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #prompt-button {
+      opacity: 0.6;
+      border: none;
+      font-size: 18px;
+      background-color: transparent;
+    }
+    #property-name-input {
+      border: none;
+      background: transparent;
+      border-bottom: 2px solid black;
+      font-size: 18px;
+      color: black;
+    }
+    #line {
+      position: absolute;
+      top: 21px;
+      width: 100%;
+      border-top: 1px solid black;
+    }
+    #delete-property-button {
+      width: 16px;
+      height: 16px;
+      padding: 0px;
+      border: 0px;
+      background-color: transparent;
+    }
+    #property-name {
+      position: absolute;
+      top: -19px;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+  <div id="keyframe-container">
+    <template repeat="{{p in properties}}">
+      <div class="property-container" data-name="{{p.name}}" on-pointerup="{{addKeyFrame}}">
+        <div id="line">
+          <template repeat="{{percentage in [20, 80]}}">
+            <div id="property-name" on-mouseover="{{toggleDeleteButton}}"
+                on-mouseout="{{toggleDeleteButton}}" style="left: {{percentage}}%">
+              {{p.name}}
+              <button id="delete-property-button" class="hidden"
+                  data-name="{{p.name}}" on-click="{{deleteProperty}}">×</button>
+            </div>
+          </template>
+        </div>
+        <template repeat="{{frame, i in p.frames}}">
+          <wat-keyframe-item property="{{frame.name}}" value="{{frame.value}}" 
+              position="{{frame.position}}" editor="{{frame.editor}}" index="{{i}}">
+          </wat-keyframe-item>
+        </template>
+      </div>
+    </template>
+    <div id="new-property-prompt" class="property-container">
+        <button id="prompt-button" class="{{addingProperty ? 'hidden' : ''}}"
+            on-pointerup="{{togglePropertyInput}}">
+          Click To Add New Property
+        </button>
+        <div class="{{addingProperty ? '' : 'hidden'}}">
+          <input id="property-name-input" type="text" placeholder="New Property Name">
+          <button on-pointerup="{{addProperty}}">Add</button>
+        </div>
+    </div>
+  </div>
+  </template>
+  <script>
+    'use strict';
+
+    Polymer('wat-keyframe-editor', {
+      timedItem: null,
+      width: 0,
+      properties: null,
+      addingProperty: false,
+      observe: {
+        'width': 'timedItemChanged',
+      },
+      ready: function() {
+        this.addEventListener('on-property-change', this.convertPropertyToFrames);
+
+        this.addEventListener('delete-keyframe', function(e) {
+          var frames = this.getProperty(e.detail.name).object.frames;
+          frames.splice(e.detail.index, 1);
+        });
+      },
+      timedItemChanged: function() {
+        if (!this.timedItem || !this.timedItem.effect) {
+          return;
+        }
+
+        // Only accept timedItems that has keyframeEffect.
+        if (!this.timedItem.effect instanceof KeyframeEffect) {
+          this.timedItem = null;
+          return;
+        }
+
+        var _properties = this.timedItem.effect._propertySpecificKeyframes();
+
+        var properties = [];
+        for (var prop in _properties) {
+          var _frames = _properties[prop];
+          var frames = [];
+          for (var i = 0; i < _frames.length; i++) {
+            frames.push({
+              name: prop,
+              value: _frames[i].cssValue,
+              position: this.width * _frames[i].offset,
+              editor: this,
+              index: i,
+            });
+          }
+          properties.push({name: prop, frames: frames});
+        }
+        this.properties = properties;
+      },
+      addKeyFrame: function(e) {
+        var target = e.currentTarget;
+        e.stopPropagation();
+        var property = target.dataset['name'];
+        var frames = this.getProperty(property).object.frames;
+
+        frames.push({
+          name: property,
+          value: 'undefined',
+          position: e.clientX - target.getBoundingClientRect().left,
+          editor: this,
+          index: frames.length,
+        });
+      },
+      convertPropertyToFrames: function() {
+        // When converting the properties back to keyframes, we need to sort the values 
+        // otherwise setFrames will reject the keyframes. It is done by insertion sort 
+        // because we expect the keyframes will be mostly sorted.
+        var insert = function (frame, frames) {
+          var i = frames.length - 1;
+          while (i >= 0 && frame.offset < frames[i].offset) {
+            i--;
+          }
+          frames.splice(i + 1, 0, frame);
+        };
+
+        var newFrames = [];
+        var properties = this.getPropertyContainers();
+        for (var i = 0; i < properties.length; i++) {
+          var items = properties[i].querySelectorAll('wat-keyframe-item');
+          for (var j = 0; j < items.length; j++) {
+            var frame = {};
+            frame[items[j].property] = items[j].value;
+            frame['offset'] = items[j].position / this.width;
+            insert(frame, newFrames);
+          }
+        }
+
+        this.timedItem.effect.setFrames(newFrames);
+      },
+      getProperty: function(property) {
+        for (var i = 0; i < this.properties.length; i++) {
+          if (this.properties[i].name === property) {
+            return {object: this.properties[i], index: i};
+          }
+        }
+        return null;
+      },
+      getPropertyContainers: function() {
+        return this.$['keyframe-container'].querySelectorAll('.property-container');
+      },
+      addProperty: function() {
+        if (!this.properties) {
+          this.properties = [];
+        }
+
+        // Hide the property input again.
+        this.togglePropertyInput();
+
+        var newProperty = this.$['property-name-input'].value;
+        if (!newProperty || this.getProperty(newProperty) !== null) {
+          return;
+        }
+
+        this.properties.push({name: newProperty, frames: []});
+      },
+      deleteProperty: function(e) {
+        var property = e.target.dataset['name'];
+        var propertyIndex = this.getProperty(property).index;
+        this.properties.splice(propertyIndex, 1);
+
+        // Force it to remove the property from the DOM before updating
+        // the keyframes because the keyframe will pull all the properties
+        // from these property containers. Can't rely on polymer to update
+        // the DOM because polymer update is asynchronous.
+        this.getPropertyContainers()[propertyIndex].remove();
+        this.convertPropertyToFrames();
+      },
+      toggleDeleteButton: function(e) {
+        var button = e.currentTarget.querySelector('button');
+        button.classList.toggle('hidden');
+      },
+      togglePropertyInput: function() {
+        this.addingProperty = !this.addingProperty;
+      },
+    });
+  </script>
+</polymer-element>
