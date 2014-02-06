@@ -5,11 +5,11 @@
     "polymer": "Polymer/polymer#master"
   },
   "homepage": "https://github.com/Polymer/polymer-doc-viewer",
-  "_release": "e4a1cfdb67",
+  "_release": "eee69d29a4",
   "_resolution": {
     "type": "branch",
     "branch": "master",
-    "commit": "e4a1cfdb67e192d7472aeaea705654d6e5bfb529"
+    "commit": "eee69d29a40103e444892f7af8c657ca42f23a3a"
   },
   "_source": "git://github.com/Polymer/polymer-doc-viewer.git",
   "_target": "master",

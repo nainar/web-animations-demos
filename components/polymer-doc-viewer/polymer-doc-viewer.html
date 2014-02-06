@@ -28,6 +28,7 @@ Set url to add documentation from that location to the view.
   <template>
 
     <context-free-parser url="{{url}}" on-data-ready="{{parserDataReady}}"></context-free-parser>
+
     <template repeat="{{sources}}">
       <context-free-parser url="{{}}" on-data-ready="{{parserDataReady}}"></context-free-parser>
     </template>
@@ -106,11 +107,6 @@ Set url to add documentation from that location to the view.
             <div flex>
               <div style="padding: 16px;">
 
-                <!--<section class="box">
-                  Module<br>
-                  <span class="name">{{class.module}}</span>
-                </section>-->
-
                 <template if="{{class.description}}">
                   <section class="box">
                     <div class="ntitle">Description</div>
@@ -183,16 +179,26 @@ Set url to add documentation from that location to the view.
         // TODO(sjmiles): improve method of configuring grid
         this.$.grid.nodes = [this.$.navigation, this.$.docs];
         this.$.grid.layout = this.layouts.open;
-      },
-      onMutation: function(node, listener) {
-        var observer = new MutationObserver(function() {
-          listener.call(this, observer);
-          observer.disconnect();
-        }.bind(this));
-        observer.observe(node, {childList: true, subtree: true});
+        this.onMutation(this.$.docs, this.docsNodeChanged);
       },
       parseLocationHash: function() {
         this.route = window.location.hash.slice(1);
+      },
+      routeChanged: function() {
+        var anchor = this.shadowRoot.querySelector('a[id="' + this.route + '"]');
+        if (anchor) {
+          anchor.scrollIntoView();
+        }
+      },
+      toggleNav: function(event, detail, sender) {
+        this.navOpen = !this.navOpen;
+      },
+      navOpenChanged: function() {
+        this.effectLayout();
+      },
+      effectLayout: function() {
+        this.$.grid.layout = this.navOpen ? this.layouts.open : this.layouts.closed;
+        this.$.fixed.style.left = this.navOpen ? this.fixedLeft + 'px' : '0px';
       },
       gridLayout: function() {
         // TODO(sjmiles): the 'fixed' header bar is relative to the screen
@@ -210,7 +216,9 @@ Set url to add documentation from that location to the view.
         detail.code = hljs.highlightAuto(detail.code).value;
       },
       docsNodeChanged: function(observer) {
+        this.$.docs.scrollTop = 0;
         this.docsScroll();
+        this.onMutation(this.$.docs, this.docsNodeChanged);
       },
       docsScroll: function() {
         var t = this.$.docs.scrollTop + 80;
@@ -225,43 +233,18 @@ Set url to add documentation from that location to the view.
           }
         }
       },
-      routeChanged: function() {
-        var anchor = this.shadowRoot.querySelector('a[id="' + this.route + '"]');
-        if (anchor) {
-          anchor.scrollIntoView();
-        }
-      },
-      toggleNav: function(event, detail, sender) {
-        // TODO(sjmiles): would be nice to automate this common action
-        this.navOpen = !this.navOpen;
-      },
-      navOpenChanged: function() {
-        // TODO(sjmiles): would be nice to automate this common action
-        this.effectLayout();
-      },
-      effectLayout: function() {
-        this.$.grid.layout = this.navOpen ? this.layouts.open : this.layouts.closed;
-        this.$.fixed.style.left = this.navOpen ? this.fixedLeft + 'px' : '0px';
-      },
       parserDataReady: function(event) {
-        this.onMutation(this.$.docs, this.docsNodeChanged);
-        this.classes = this.classes.concat(event.target.data.classes);
+        this.assimilateData(event.target.data);
       },
       dataChanged: function() {
-        // neccesary data structure:
-        //  classes: [{ 
-        //    name: String,
-        //    attributes: [
-        //    ],
-        //    events: [
-        //    ],
-        //    methods: [
-        //    ]
-        //  }, ...]
-        
-        // schedule more work when changes here propagate to DOM
-        this.onMutation(this.$.docs, this.docsNodeChanged);
-        this.classes = this.classes.concat(this.data.classes);
+        this.assimilateData(this.data);
+      },
+      assimilateData: function(data) {
+        this.classes = this.classes.concat(data.classes);
+        this.classes.sort(function(a, b) {
+          var na = a.name, nb = b.name;
+          return (na < nb) ? -1 : (na == nb) ? 0 : 1;
+        });
       }
     });
   </script>

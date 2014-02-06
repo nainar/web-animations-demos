@@ -92,6 +92,9 @@
           });
         });
 
+        if (classes.length === 0) {
+          classes.push({name: this.url.split('/').pop(), description: '**Undocumented**'});
+        }
         this.data = { classes : classes };
       },
 
