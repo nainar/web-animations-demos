@@ -38,6 +38,7 @@ Polymer('wat-code-editor', {
     } else {
       this.selected = window.localStorage['wat-selected-editors'].split(',');
     }
+    this.previewFrame = this.$['preview-frame'];
     this.updatePreview();
   },
 
@@ -106,7 +107,7 @@ Polymer('wat-code-editor', {
   selectedChanged: function() {
     window.localStorage['wat-selected-editors'] = this.selected;
 
-    var editors = [this.$.javascript, this.$.html, this.$.css];
+    var editors = [this.$.javascript, this.$.html, this.$.css, this.$.keyframe];
     var visible = [];
     
     editors.forEach(function(editor) {
@@ -128,10 +129,13 @@ Polymer('wat-code-editor', {
       } else if (visible.length == 2) {
         this.$.container2.appendChild(visible[0]);
         this.$.container2.appendChild(visible[1]);
-      } else if (visible.length == 3) {
+      } else if (visible.length >= 3) {
         this.$.container1.appendChild(visible[0]);
         this.$.container2.appendChild(visible[1]);
         this.$.container2.appendChild(visible[2]);
+        if (visible.length == 4) {
+          this.$.container2.appendChild(visible[3]);
+        }
       }
     }
     this.style.display = 'none';

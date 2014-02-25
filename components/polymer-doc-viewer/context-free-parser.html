@@ -1,6 +1,6 @@
 <link rel="import" href="../polymer-ajax/polymer-ajax.html">
 
-<polymer-element name="context-free-parser" attributes="url data">
+<polymer-element name="context-free-parser" attributes="url text data">
 
   <template>
 
@@ -17,7 +17,7 @@
       textChanged: function() {
 
         if (!this.text) {
-          console.log('textChanged:', this.text);
+          //console.log('textChanged:', this.text);
           return;
         }
 
@@ -39,16 +39,17 @@
 
         var js_matches = text.match(/\/\*\*([\s\S]*?)\*\//g) || [];
         text = text.replace(/\/\*\*([\s\S]*?)\*\//g, '');
+
         var html_matches = text.match(/<!--([\s\S]*?)-->/g) || [];
         var matches = html_matches.concat(js_matches);
 
         matches.forEach(function(m) {
 
-          var lines = m.replace(/\r\n/g, '\n').replace(/^\s*\/\*\*|^\s*\*\/|^\s*\*|^\s*\<\!-\-|^s*\-\-\>/gm, '').split('\n');
-          
+          var lines = m.replace(/\r\n/g, '\n').replace(/^\s*\/\*\*|^\s*\*\/|^\s*\* ?|^\s*\<\!-\-|^s*\-\-\>/gm, '').split('\n');
+
           var pragmas = [];
           lines = lines.filter(function(l) {
-            var m = l.match(/\s*@(\w*) (.*)/);
+            var m = l.match(/\s*@([\w-]*) (.*)/);
             if (!m) {
               return true;
             }
@@ -62,6 +63,7 @@
             switch (pragma) {
 
               case 'class':
+              case 'element':
                 current = {
                   name: content,
                   description: code
@@ -86,7 +88,8 @@
                 break;
 
               default:
-                makePragma(current, pragma, content);
+                current[pragma] = content;
+                //makePragma(current, pragma, content);
                 break;
             }
           });

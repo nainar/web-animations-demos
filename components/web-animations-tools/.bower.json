@@ -5,6 +5,7 @@
     "polymer": "Polymer/polymer#0.1.3",
     "polymer-selector": "Polymer/polymer-selector#master",
     "polymer-ui-toggle-button": "Polymer/polymer-ui-toggle-button#master",
+    "polymer-ui-splitter": "Polymer/polymer-ui-splitter#master",
     "polymer-flex-layout": "Polymer/polymer-flex-layout#master",
     "polymer-animation": "Polymer/polymer-animation#master",
     "polymer-docs": "Polymer/polymer-docs#master",
@@ -15,11 +16,11 @@
     "github-js": "michael/github#master"
   },
   "homepage": "https://github.com/web-animations/web-animations-tools",
-  "_release": "94983783f0",
+  "_release": "788be79f6c",
   "_resolution": {
     "type": "branch",
     "branch": "master",
-    "commit": "94983783f0383612209aed219be26dc6bd8d2bb0"
+    "commit": "788be79f6cc2daf9f5220cd4779d2576187b2bb3"
   },
   "_source": "git://github.com/web-animations/web-animations-tools.git",
   "_target": "master",

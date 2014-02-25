@@ -5,11 +5,11 @@
     "polymer": "Polymer/polymer#master"
   },
   "homepage": "https://github.com/Polymer/polymer-ui-toggle-button",
-  "_release": "40f5f2fb12",
+  "_release": "3a5c0bcb05",
   "_resolution": {
     "type": "branch",
     "branch": "master",
-    "commit": "40f5f2fb12cb6c248a226a19d2ba195fb1aae7d2"
+    "commit": "3a5c0bcb051f04180e35c35c21e1d3ed4f3a6a30"
   },
   "_source": "git://github.com/Polymer/polymer-ui-toggle-button.git",
   "_target": "master",

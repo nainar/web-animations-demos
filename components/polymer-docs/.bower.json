@@ -1,11 +1,11 @@
 {
   "name": "polymer-docs",
   "homepage": "https://github.com/Polymer/polymer-docs",
-  "_release": "6df839e849",
+  "_release": "4e9c80106c",
   "_resolution": {
     "type": "branch",
     "branch": "master",
-    "commit": "6df839e849824d86e954a3a81e115429881418e3"
+    "commit": "4e9c80106cb402da93bea38e62bcf295d595f3da"
   },
   "_source": "git://github.com/Polymer/polymer-docs.git",
   "_target": "master",
