@@ -5,11 +5,11 @@
     "polymer": "Polymer/polymer#master"
   },
   "homepage": "https://github.com/Polymer/polymer-flex-layout",
-  "_release": "e73e29b1bc",
+  "_release": "a23301a0c6",
   "_resolution": {
     "type": "branch",
     "branch": "master",
-    "commit": "e73e29b1bc108ea2d329fbc8433cbf4f344d6b6a"
+    "commit": "a23301a0c654526527a4bca5ed54907bd72f88eb"
   },
   "_source": "git://github.com/Polymer/polymer-flex-layout.git",
   "_target": "master",

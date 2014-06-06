@@ -1,5 +1,7 @@
 [![Build Status](https://travis-ci.org/web-animations/web-animations-js.png?branch=master)](https://travis-ci.org/web-animations/web-animations-js)
 
+Latest specification at http://dev.w3.org/fxtf/web-animations/.
+
 ## Learn the tech
 
 ### Why Web Animations?
@@ -35,7 +37,7 @@ a `<div>` over 0.5 seconds. The animation alternates producing a pulsing effect.
           {opacity: "1.0", transform: "scale(1)"}
         ],
         {
-          direction: "alternate", duration: 0.5, iterations: Infinity
+          direction: "alternate", duration: 500, iterations: Infinity
         }));
     </script>
 
@@ -45,12 +47,12 @@ The Web Animations model is a description of an engine for animation content on 
 
 Web Animations also exposes a JS API to the model. This API defines a number of
 new interfaces that are exposed to JavaScript. We'll go through some of the more
-important ones here: Animations, AnimationEffects, TimingDictionaries, TimingGroups, and Players.
+important ones here: Animations, AnimationEffects, TimingDictionaries, TimingGroups, and AnimationPlayers.
 
 An `Animation` object defines a single animation effect that applies to a single element target. For example:
 
     var animation = new Animation(targetElement,
-        [{left: '0px'}, {left: '100px'}], 2);
+        [{left: '0px'}, {left: '100px'}], 2000);
 
 Here, the target element's "left" CSS property is modified smoothly from `0px` to `100px` over 2 seconds.
 
@@ -61,7 +63,7 @@ modified by an animation, and the values that those properties and attributes
 vary between. AnimationEffect objects also control whether the effect replaces
 or adds to the underlying value.
 
-There are three major kinds of effects: `KeyframeEffect`, `MotionPathEffect`, and `CustomAnimationEffect`.
+There are three major kinds of effects: `KeyframeEffect`, `MotionPathEffect`, and `EffectCallback`.
 
 #### Animating between keyframes
 
@@ -96,32 +98,32 @@ A `MotionPathEffect` allows elements to be animated along SVG-style paths. For e
     </svg>
     <script>
       var animFunc = new MotionPathEffect(document.querySelector('#path').pathSegList);
-      var animation = new Animation(targetElement, animFunc, 2);
+      var animation = new Animation(targetElement, animFunc, 2000);
     </script>
 
 #### Custom animation effects
 
-A `CustomAnimationEffect` allows animations to generate call-outs to JavaScript
+An `EffectCallback` allows animations to generate call-outs to JavaScript
 rather than manipulating properties directly. Please see the
 [specification](http://www.w3.org/TR/web-animations/#custom-effects) for more details on this
 feature.
 
 ### Sequencing and synchronizing animations
 
-Two different types of TimingGroups (`ParGroup` and `SeqGroup`) allow animations to be synchronized and sequenced.
+Two different types of TimingGroups (`AnimationGroup` and `AnimationSequence`) allow animations to be synchronized and sequenced.
 
 To play a list of animations in parallel:
 
-    var parGroup = new ParGroup([new Animation(...), new Animation(...)]);
+    var animationGroup = new AnimationGroup([new Animation(...), new Animation(...)]);
 
 To play a list in sequence:
 
-    var seqGroup = new SeqGroup([new Animation(...), new Animation(...)]);
+    var animationSequence = new AnimationSequence([new Animation(...), new Animation(...)]);
 
-Because `Animation`, `ParGroup`, `SeqGroup` are all TimedItems, groups can be nested:
+Because `Animation`, `AnimationGroup`, `AnimationSequence` are all TimedItems, groups can be nested:
 
-    var parGroup = new ParGroup([
-      new SeqGroup([
+    var animationGroup = new AnimationGroup([
+      new AnimationSequence([
         new Animation(...),
         new Animation(...),
       ]),
@@ -130,7 +132,7 @@ Because `Animation`, `ParGroup`, `SeqGroup` are all TimedItems, groups can be ne
 
 Groups also take an optional TimingDictionary parameter (see below), which among other things allows iteration and timing functions to apply at the group level:
 
-    var parGroup = new ParGroup([new Animation(...), new Animation(...)], {iterations: 4});
+    var animationGroup = new AnimationGroup([new Animation(...), new Animation(...)], {iterations: 4});
 
 ### Controlling the animation timing
 
@@ -158,34 +160,34 @@ backwards fills, and animation forwards fills. There are a few simple rules whic
 
 The following example illustrates these rules:
 
-    var parGroup = new ParGroup([
-      new SeqGroup([
-        new Animation(..., {duration: 3}),
-        new Animation(..., {duration: 5, fill: 'both'})
-      ], {duration: 6, delay: 3, fill: 'none'}),
-      new Animation(..., {duration: 8, fill: 'forward'})
+    var animationGroup = new AnimationGroup([
+      new AnimationSequence([
+        new Animation(..., {duration: 3000}),
+        new Animation(..., {duration: 5000, fill: 'both'})
+      ], {duration: 6000, delay: 3000, fill: 'none'}),
+      new Animation(..., {duration: 8000, fill: 'forward'})
     ], {iterations: 2, fill: 'forward'});
 
 In this example:
 
-- The `SeqGroup` has an explicit `duration` of 6 seconds, and so the
+- The `AnimationSequence` has an explicit `duration` of 6 seconds, and so the
 second child animation will only play for the first 3 of its 5 second duration
-- The `ParGroup` has no explicit duration, and will be provided with a
+- The `AnimationGroup` has no explicit duration, and will be provided with a
 calculated duration of the max (`duration + delay`) of its children - in this case 9 seconds.
-- Although `fill: "both"` is specified for the second `Animation` within the `SeqGroup`, the `SeqGroup` itself has a `fill` of "none". Hence, as the animation ends right at the end of the `SeqGroup`, the animation will only fill backwards, and only up until the boundary of the `SeqGroup` (i.e. 3 seconds after the start of the `ParGroup`).
-- The `Animation` inside the `ParGroup` and the `ParGroup` are both `fill: "forward"`. Therefore the animation will fill forward in two places: 
-    - from 8 seconds after the `ParGroup` starts until the second iteration of the `ParGroup` starts (i.e. for 1 second)
-    - from 17 seconds after the `ParGroup` starts, extending forward indefinitely.
+- Although `fill: "both"` is specified for the second `Animation` within the `AnimationSequence`, the `AnimationSequence` itself has a `fill` of "none". Hence, as the animation ends right at the end of the `AnimationSequence`, the animation will only fill backwards, and only up until the boundary of the `AnimationSequence` (i.e. 3 seconds after the start of the `AnimationGroup`).
+- The `Animation` inside the `AnimationGroup` and the `AnimationGroup` are both `fill: "forward"`. Therefore the animation will fill forward in two places: 
+    - from 8 seconds after the `AnimationGroup` starts until the second iteration of the `AnimationGroup` starts (i.e. for 1 second)
+    - from 17 seconds after the `AnimationGroup` starts, extending forward indefinitely.
 
 ### Playing Animations
 
-In order to play an `Animation` or `TimingGroup`, a `Player` must be constructed:
+In order to play an `Animation` or `TimingGroup`, an `AnimationPlayer` must be constructed:
 
     var player = document.timeline.play(myAnimation);
 
-Players provide complete control the start time and current playback head of their attached animation. However, players can't modify any internal details of an animation.
+AnimationPlayers provide complete control the start time and current playback head of their attached animation. However, players can't modify any internal details of an animation.
 
-Players can be used to pause, seek, reverse, or modify the playback rate of an animation.
+AnimationPlayers can be used to pause, seek, reverse, or modify the playback rate of an animation.
 
 `document.timeline.currentTime` is a timeline's global time. It gives the number
 of seconds since the document fired its load event.
@@ -209,11 +211,11 @@ following approach to prefix handling:
 writing animated properties back to the platform.
 - where possible, the polyfill will *only* accept unprefixed versions of experimental features. For example:
 
-        var animation = new Animation(elem, {"transform": "translate(100px, 100px)"}, 2);
+        var animation = new Animation(elem, {"transform": "translate(100px, 100px)"}, 2000);
 
   will work in all browsers that implement a conforming version of `transform`, but
 
-        var animation =  new Animation(elem, {"-webkit-transform": "translate(100px, 100px)"}, 2);
+        var animation =  new Animation(elem, {"-webkit-transform": "translate(100px, 100px)"}, 2000);
     
   will not work anywhere.
 
@@ -227,3 +229,9 @@ then the polyfill will provide a console warning in browsers where these feature
 
 For running tests or building minified files, consult the
 [tooling information](http://www.polymer-project.org/resources/tooling-strategy.html).
+
+## Breaking changes
+
+When we make a potentially breaking change to the polyfill's API surface (like a rename) we'll continue supporting the old version, deprecated, for three months and ensure that there are console warnings that a change is pending. After three months, the old version of the API surface (e.g. the old version of a function name) will be removed. If you see deprecation warnings you can't avoid it by not updating.
+
+We also announce anything that isn't a bug fix on web-animations-changes@googlegroups.com (https://groups.google.com/forum/#!forum/web-animations-changes).

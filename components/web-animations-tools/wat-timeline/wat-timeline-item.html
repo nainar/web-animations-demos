@@ -14,7 +14,23 @@ See the License for the specific language governing permissions and
 
 limitations under the License.
 -->
-
+<!--
+/**
+ * @module Web Animations Tools
+ */
+/**
+ * `wat-timeline-item` is the data structure that is used in `wat-timeline` to
+ * represent an animation or a group of aniamtions.
+ *
+ * Example:
+ *     <template repeat="{{child in timedItem._children}}">
+ *        <wat-timeline-item parentItem="{{}}" timeline="{{timeline}}" timedItem="{{child}}">
+ *        </wat-timeline-item>
+ *     </template>
+ *
+ * @class wat-timeline-item
+ */
+-->
 <!DOCTYPE html>
 <link rel="import" href="../../polymer/polymer.html">
 <link rel="import" href="../wat-keyframe-editor/wat-keyframe-editor.html">
@@ -72,12 +88,12 @@ limitations under the License.
   </style>
     <div id="group-container" class="{{timeline.selected === timedItem ? 'selected' : ''}}"
           style="left:{{(delay / parentPlaybackRate) * timeline.pixelsPerSecond}}px"
-          on-pointerup="{{onSelect}}" on-dblclick="{{onFocus}}">
+          on-up="{{onSelect}}" on-dblclick="{{onFocus}}">
       <wat-keyframe-editor class="{{editingKeyframe ? '' : 'hidden'}}" timedItem="{{timedItem}}" 
           width="{{firstIterDuration * timeline.pixelsPerSecond}}"></wat-keyframe-editor>
       <div class="timeline-item {{playbackRate < 0 ? 'negativePlayback' : ''}} {{editingKeyframe ? 'hidden' : ''}}"
-            style="min-width:{{firstIterDuration * timeline.pixelsPerSecond}}px;
-                    max-width:{{firstIterDuration * timeline.pixelsPerSecond}}px;">
+            style="min-width:{{firstIterDuration * timeline.pixelsPerSecond / 1000}}px;
+                    max-width:{{firstIterDuration * timeline.pixelsPerSecond / 1000}}px;">
         <span></span>
         <div id="children" class="{{(timedItem.type && timedItem.collapsed) ? 'hidden' : ''}}">
           <template if="{{timedItem.type}}">
@@ -92,14 +108,14 @@ limitations under the License.
         <!-- FIXME: Not sure why do we need min width here but without it 
              there will have layout problem when zoom in on the page. -->
         <div class="timeline-item iteration" style="min-width:{{length * timeline.pixelsPerSecond}}px;"
-            on-pointerup="{{onSelect}}" on-dblclick="{{onFocus}}"></div>
+            on-up="{{onSelect}}" on-dblclick="{{onFocus}}"></div>
       </template>
       <!-- FIXME: Need to check if the effect is keyframe effect. 
                   Cannot do instanceof in template for now. -->
       <template if="{{!timedItem.type}}">
         <wat-button id="edit-button" class="faded" title="edit" 
             on-mouseover="{{toggleButtonFading}}" on-mouseleave="{{toggleButtonFading}}" 
-            on-pointerup="{{toggleKeyframeEditor}}">✎</wat-button>
+            on-up="{{toggleKeyframeEditor}}">✎</wat-button>
       </template>
     </div>
   </template>
@@ -107,8 +123,33 @@ limitations under the License.
     'use strict';
 
     Polymer('wat-timeline-item', {
+      /**
+       * The `wat-timeline` object this item attaches to.
+       * Possible values are wat-timeline objects that contains
+       * this item.
+       *
+       * @attribute timeline
+       * @type wat-timeline
+       * @default null
+       */
       timeline: null,
+
+      /**
+       * The timedItem it represents on the timeline.
+       *
+       * @attribute timedItem
+       * @type TimedItem
+       * @default null
+       */
       timedItem: null,
+
+      /**
+       * The objects that stores the parent information of this timedItem.
+       *
+       * @attribute parentItem
+       * @type Object
+       * @default null
+       */
       parentItem: null,
       delay: 0,
       playbackRate: 1,
@@ -127,23 +168,23 @@ limitations under the License.
         this.observer.addPath(this, 'timedItem.startTime');
         this.observer.addPath(this, 'timedItem.endTime');
         this.observer.addPath(this, 'timedItem.duration');
-        this.observer.addPath(this, 'timedItem.specified.delay');
-        this.observer.addPath(this, 'timedItem.specified.endDelay');
-        this.observer.addPath(this, 'timedItem.specified.playbackRate');
-        this.observer.addPath(this, 'timedItem.specified.iterations');
-        this.observer.addPath(this, 'timedItem.specified.iterationStart');
+        this.observer.addPath(this, 'timedItem.timing.delay');
+        this.observer.addPath(this, 'timedItem.timing.endDelay');
+        this.observer.addPath(this, 'timedItem.timing.playbackRate');
+        this.observer.addPath(this, 'timedItem.timing.iterations');
+        this.observer.addPath(this, 'timedItem.timing.iterationStart');
         this.observer.open(this.notifyRelayout.bind(this));
       },
       performLayout: function() {
-        var timingInput = this.timedItem.specified;
+        var timingInput = this.timedItem.timing;
 
         // parentPlaybackRate will affect the delay of this timedItem and this timedItem's 
         // own playbackRate will only affect the duration of the item. Therefore we need both.
         this.parentPlaybackRate = Math.abs(this.parentItem.playbackRate);
         this.playbackRate = this.parentPlaybackRate * timingInput.playbackRate;
 
-        this.delay = (this.timedItem.parent instanceof SeqGroup) ?
-          ((this.timedItem.previousSibling) ? this.timedItem.previousSibling.specified.endDelay : 0) : 
+        this.delay = (this.timedItem.parent instanceof AnimationSequence) ?
+          ((this.timedItem.previousSibling) ? this.timedItem.previousSibling.timing.endDelay : 0) : 
           0;
         this.delay += timingInput.delay - this.parentItem.iterStartDuration + this.timedItem.startTime;
 

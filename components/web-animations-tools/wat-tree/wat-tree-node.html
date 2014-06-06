@@ -14,6 +14,23 @@ See the License for the specific language governing permissions and
 
 limitations under the License.
 -->
+<!--
+/**
+ * @module Web Animations Tools
+ */
+/**
+ * `wat-tree-node` is the data structure used in `wat-tree` to represent
+ *  a node of the tree view.
+ *
+ * Example: (as used in `wat-tree-node` itself)
+ *     <template repeat="{{child in timedItem._children}}">
+ *         <wat-tree-node tree="{{tree}}" timedItem="{{child}}"
+ *            indent="{{indent + tree.tabSize}}"></wat-tree-node>
+ *     </template>
+ *
+ * @class wat-tree-node
+ */
+-->
 <link rel="import" href="../../polymer/polymer.html">
 
 <polymer-element name="wat-tree-node" attributes="tree timedItem indent"
@@ -89,7 +106,7 @@ limitations under the License.
           <span on-click="{{toggleSubtree}}">{{timedItem.collapsed ? '⊞' : '⊟'}}</span>
         </template>
         <span id="name">
-          {{timedItem.name ? timedItem.name : (timedItem.type ? timedItem.type + 'Group' : 'animation')}}
+          {{timedItem.name ? timedItem.name : (timedItem.type ? (timedItem.type == 'par' ? 'AnimationGroup' : 'AnimationSequence') : 'animation')}}
         </span>
         <input class="hidden" id="name-input" type="text" on-keyup="{{changeName}}" on-blur="{{changeName}}">
 
@@ -101,7 +118,7 @@ limitations under the License.
     </div>
 
     <ul id="selection" class="hidden" on-mouseout="{{hideSelectionMenu}}">
-      <template repeat="{{name in ['Animation', 'ParGroup', 'SeqGroup']}}">
+      <template repeat="{{name in ['Animation', 'AnimationGroup', 'AnimationSequence']}}">
         <li on-click="{{addAnimation}}" value="{{name}}">{{name}}</li>
       </template>
     </ul>

@@ -4,8 +4,33 @@
   var APPEND = 3;
 
   Polymer('wat-tree-node', {
+    /**
+     * The tree view that this node is attached to. Possible values 
+     * are wat-tree objects that contains this node.
+     *
+     * @attribute tree
+     * @type wat-tree
+     * @default null
+     */
     tree: null,
+
+    /**
+     * The timedItem it represents in the tree view. Possible values
+     * are an animation of a group of animations.
+     *
+     * @attribute timedItem
+     * @type TimedItem
+     * @default null
+     */
     timedItem: null,
+    /**
+     * The number of tabs this item is indenting. Possible values are
+     * any non-negative integers.
+     *
+     * @attribute indent
+     * @type Number
+     * @default 0
+     */
     indent: 0,
     dropBefore: false,
     dropAfter: false,
@@ -140,7 +165,7 @@
       // When adding an animation to a non-group timedItem,
       // the tool will automatically create a group to contain it.
       if (this.timedItem instanceof Animation) {
-        var root = new ParGroup([]);
+        var root = new AnimationGroup([]);
 
         if (this.timedItem.parent) {
           this.timedItem.before(root);
@@ -165,11 +190,11 @@
         case 'Animation':
           newItem = new Animation(null, null, null);
           break;
-        case 'ParGroup':
-          newItem = new ParGroup([], null);
+        case 'AnimationGroup':
+          newItem = new AnimationGroup([], null);
           break;
-        case 'SeqGroup':
-          newItem = new SeqGroup([], null);
+        case 'AnimationSequence':
+          newItem = new AnimationSequence([], null);
           break;
       }
       this.timedItem.append(newItem);

@@ -6,11 +6,11 @@
     "polymer-selection": "Polymer/polymer-selection#master"
   },
   "homepage": "https://github.com/Polymer/polymer-selector",
-  "_release": "d6a967b94f",
+  "_release": "53d1221995",
   "_resolution": {
     "type": "branch",
     "branch": "master",
-    "commit": "d6a967b94fff3ba875195d5b1ce472509bdd54ed"
+    "commit": "53d122199574ce38a9f8a0b0915b8c72bd627095"
   },
   "_source": "git://github.com/Polymer/polymer-selector.git",
   "_target": "master",

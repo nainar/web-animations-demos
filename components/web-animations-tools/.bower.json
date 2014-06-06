@@ -12,15 +12,20 @@
     "polymer-doc-viewer": "Polymer/polymer-doc-viewer#master",
     "polymer-home-page": "Polymer/polymer-home-page#master",
     "marked-js": "Polymer/marked-js#master",
-    "web-animations-js": "web-animations/web-animations-js#master",
+    "web-animations-js": "web-animations/web-animations-js#experimental",
     "github-js": "michael/github#master"
   },
+  "resolutions": {
+    "polymer": "master",
+    "web-animations-js": "experimental",
+    "platform": "master"
+  },
   "homepage": "https://github.com/web-animations/web-animations-tools",
-  "_release": "788be79f6c",
+  "_release": "ebd17e295c",
   "_resolution": {
     "type": "branch",
     "branch": "master",
-    "commit": "788be79f6cc2daf9f5220cd4779d2576187b2bb3"
+    "commit": "ebd17e295cc3af656b25a30811dbda0e3469bcd1"
   },
   "_source": "git://github.com/web-animations/web-animations-tools.git",
   "_target": "master",
